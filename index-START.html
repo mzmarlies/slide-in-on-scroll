@@ -43,6 +43,9 @@
   </div>
 
   <script>
+    // debounce will only let this function run for maximum of 20ms
+    // wrap your checkslide function in the debounce function to have this apply to the scroll, to prevernt logging scroll events endlessly
+    // anytime you're using "scroll" as an event, you might want to wrap your function with debuonce to prevent lagging and other issues 
     function debounce(func, wait = 20, immediate = true) {
       var timeout;
       return function() {
@@ -57,6 +60,42 @@
         if (callNow) func.apply(context, args);
       };
     }
+
+
+    const sliderImages = document.querySelectorAll('.slide-in');
+
+    // loop over every single image and figure out where the image needs to be shown
+    // need to determine when the image is 50% showing from the top and then 50% showing from the bottom
+    // you can figure out how far a page is being scrolled down by using window.scrollY
+      // console.log(window.scrollY) to see what shows
+      function checkSlide(e) {
+        sliderImages.forEach(sliderImage => {
+          // halfway through the image:
+          // console.log(window.scrollY); will tell you how much you are scrolled down from the very top of the browser
+          // to get the height we need, we have to add in window.innerHeight -> this will give us the pixel value for where you currently are at the bottom
+          const slideInAt = (window.scrollY + window.innerHeight) - sliderImage.height / 2; // this will give us a pixel value for when each of the images should be slid in at
+          
+          // bottom of the image:
+          // offsetTop will tell us the pixel vaue of top of this image in relation to the top of the window
+          const imageBottom = sliderImage.offsetTop + sliderImage.height; //this will give us the actual height of the image
+          
+          // need to check:
+            // 1. is the image half shown?
+            // 2. if not, are we scrolled past it?
+
+          const isHalfShown = slideInAt > sliderImage.offsetTop; //will make sure the slideInAt value is greater than the top of where the actual image is
+          const isNotScrolledPast = window.scrollY < imageBottom; //will make sure we are not all the way scrolled past the image, because if we are, we want the image to slide away again
+
+          if(isHalfShown && isNotScrolledPast) {
+            sliderImage.classList.add('active')
+          } else {
+            sliderImage.classList.remove('active')
+          }
+      })
+    };
+
+    // if confused, console the values we have used to see what's going on where
+    window.addEventListener('scroll', debounce(checkSlide));
 
   </script>
 
